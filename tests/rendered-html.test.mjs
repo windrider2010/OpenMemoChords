@@ -30,27 +30,37 @@ test("exposes an uncached production health endpoint", async () => {
   assert.deepEqual(await response.json(), { status: "ok", service: "openmemo-chords" });
 });
 
-test("ships the adaptive input and installable-web assets", async () => {
-  const [page, layout, css, packageJson, trainer, worklet, manifest] = await Promise.all([
+test("ships the focused two-mode adaptive practice experience", async () => {
+  const [page, layout, css, packageJson, trainer, staff, notes, worklet, manifest] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(new URL("../app/components/PianoTrainer.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/StaffNote.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/notes.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/audio/pitch-worklet.js", import.meta.url), "utf8"),
     readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"),
   ]);
 
   assert.match(page, /<PianoTrainer \/>/);
   assert.match(layout, /manifest:\s*"\/manifest\.webmanifest"/);
-  assert.match(css, /\.trainer-grid/);
+  assert.match(css, /\.notation-stage/);
+  assert.match(css, /min-height:\s*clamp\(350px, 56vh, 610px\)/);
+  assert.match(css, /\.winter-celebration/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(trainer, /recordMistake/);
   assert.match(trainer, /ratingForAnswer/);
-  assert.match(trainer, /What note is this\?/);
+  assert.match(trainer, /Have a Piano/);
+  assert.match(trainer, /No Piano/);
+  assert.match(trainer, /practiceMode === "virtual"/);
+  assert.match(trainer, /Play this note/);
   assert.match(trainer, /Start listening/);
-  assert.match(trainer, /Or tap a key/);
-  assert.match(trainer, /How adapting works/);
+  assert.match(trainer, /Crystal Crown earned!/);
+  assert.match(staff, /note\.id === "C4"/);
+  assert.match(staff, /setKeyLine\(0, 0\)/);
+  assert.match(notes, /id: "C4", midi: 60, vexKey: "c\/4"/);
+  assert.match(notes, /short ledger line below the staff/);
   assert.match(worklet, /registerProcessor\("pitch-frame-processor"/);
   assert.match(manifest, /"display": "standalone"/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);

@@ -57,12 +57,15 @@ Device learning progress remains in each browser's IndexedDB and is not stored i
 ## Current scope
 
 - responsive iPad, tablet, and mobile layout
+- opening choice between a real-piano microphone mode and an on-screen-key mode
+- oversized Level 1 notation stage focused on one note at a time
 - VexFlow-rendered treble notation
 - AudioWorklet microphone capture and Pitchy pitch detection
 - steady-pitch and confidence gates to reduce accidental answers
 - tappable, audible piano fallback
 - gentle same-question correction and a short retry queue
 - FSRS per-note long-term scheduling with device-local Dexie storage
+- streak feedback and a winter-royal crystal celebration after each round
 - installable web-app manifest
 
 No recordings leave the browser. There is currently no user account, cloud sync, teacher dashboard, or service-worker offline cache.

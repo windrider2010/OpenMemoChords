@@ -8,7 +8,7 @@ export interface LessonNote {
 }
 
 export const LESSON_NOTES: LessonNote[] = [
-  { id: "C4", midi: 60, vexKey: "c/4", label: "C", spokenName: "middle C", hint: "one tiny step below the staff" },
+  { id: "C4", midi: 60, vexKey: "c/4", label: "C", spokenName: "middle C", hint: "on the short ledger line below the staff" },
   { id: "D4", midi: 62, vexKey: "d/4", label: "D", spokenName: "D", hint: "just below the staff" },
   { id: "E4", midi: 64, vexKey: "e/4", label: "E", spokenName: "E", hint: "on the bottom line" },
   { id: "F4", midi: 65, vexKey: "f/4", label: "F", spokenName: "F", hint: "in the first space" },
