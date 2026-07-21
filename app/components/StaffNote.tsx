@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { PracticeExercise } from "../lib/curriculum";
 import type { LessonNote } from "../lib/notes";
 
-export function StaffNote({ note }: { note: LessonNote }) {
+function durationFor(beats: number) {
+  if (beats === 4) return "w";
+  if (beats === 2) return "h";
+  return "q";
+}
+
+export function StaffExercise({ exercise, activeIndex }: { exercise: PracticeExercise; activeIndex: number }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [renderError, setRenderError] = useState(false);
 
@@ -16,29 +23,41 @@ export function StaffNote({ note }: { note: LessonNote }) {
         if (!active || !hostRef.current) return;
 
         hostRef.current.replaceChildren();
+        const grandStaff = exercise.level === 4;
         const renderer = new Renderer(hostRef.current, Renderer.Backends.SVG);
-        renderer.resize(1000, 460);
+        renderer.resize(1100, grandStaff ? 500 : 410);
         const context = renderer.getContext();
-        context.scale(1.55, 1.55);
+        context.scale(1.42, 1.42);
 
-        const stave = new Stave(30, 70, 585);
-        stave.addClef("treble").setContext(context).draw();
+        const staveWidth = 720;
+        const rhythmic = exercise.level > 1;
+        const treble = new Stave(28, grandStaff ? 25 : 58, staveWidth).addClef("treble");
+        const bass = grandStaff ? new Stave(28, 185, staveWidth).addClef("bass") : null;
+        if (rhythmic) {
+          treble.addTimeSignature("4/4");
+          bass?.addTimeSignature("4/4");
+        }
+        treble.setContext(context).draw();
+        bass?.setContext(context).draw();
 
-        const staveNote = new StaveNote({
-          keys: [note.vexKey],
-          duration: "q",
-          clef: "treble",
-          autoStem: true,
+        const notes = exercise.items.map((item, index) => {
+          const staveNote = new StaveNote({
+            keys: [item.note.vexKey],
+            duration: durationFor(item.beats),
+            clef: exercise.clef,
+            autoStem: true,
+          });
+          if (exercise.clef === "treble" && item.note.id === "C4") staveNote.setKeyLine(0, 0);
+          if (index === activeIndex) {
+            staveNote.setStyle({ fillStyle: "#dd5d88", strokeStyle: "#dd5d88" });
+          }
+          return staveNote;
         });
 
-        // Middle C is staff line 0: the first ledger line below a treble stave.
-        // Setting it explicitly prevents clef/octave inference from moving C4.
-        if (note.id === "C4") staveNote.setKeyLine(0, 0);
-
-        const voice = new Voice({ numBeats: 1, beatValue: 4 }).addTickables([staveNote]);
-        new Formatter().joinVoices([voice]).format([voice], 310);
-        staveNote.setXShift(135);
-        voice.draw(context, stave);
+        const voice = new Voice({ numBeats: exercise.totalBeats, beatValue: 4 }).setStrict(false).addTickables(notes);
+        new Formatter().joinVoices([voice]).format([voice], exercise.items.length === 1 ? 350 : 540);
+        if (exercise.items.length === 1) notes[0]?.setXShift(142);
+        voice.draw(context, exercise.clef === "bass" && bass ? bass : treble);
         setRenderError(false);
       } catch {
         if (active) setRenderError(true);
@@ -49,16 +68,29 @@ export function StaffNote({ note }: { note: LessonNote }) {
     return () => {
       active = false;
     };
-  }, [note]);
+  }, [activeIndex, exercise]);
+
+  const description = exercise.items
+    .map((item) => `${item.note.spokenName} ${item.beats === 2 ? "half note" : item.beats === 4 ? "whole note" : "quarter note"}`)
+    .join(", ");
 
   return (
     <div
-      className="staff-canvas"
+      className={`staff-canvas ${exercise.level === 4 ? "grand-staff" : ""}`}
       ref={hostRef}
       role="img"
-      aria-label={`A large ${note.spokenName} quarter note on the treble clef`}
+      aria-label={`${description} on the ${exercise.clef} clef`}
     >
       {renderError ? <span className="error-copy">The music staff could not be drawn.</span> : null}
     </div>
+  );
+}
+
+export function StaffNote({ note }: { note: LessonNote }) {
+  return (
+    <StaffExercise
+      activeIndex={0}
+      exercise={{ id: `single-${note.id}`, level: 1, clef: "treble", items: [{ note, beats: 1 }], totalBeats: 1 }}
+    />
   );
 }

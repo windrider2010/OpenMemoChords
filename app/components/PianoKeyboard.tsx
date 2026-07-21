@@ -1,6 +1,6 @@
 "use client";
 
-import { LESSON_NOTES } from "../lib/notes";
+import { LESSON_NOTES, type LessonNote } from "../lib/notes";
 
 const BLACK_KEY_POSITIONS = [12.5, 25, 50, 62.5, 75];
 
@@ -19,14 +19,15 @@ function playTone(midi: number) {
   oscillator.addEventListener("ended", () => void context.close());
 }
 
-export function PianoKeyboard({ onPlay, showLabels, targetId }: {
-  onPlay: (midi: number) => void;
+export function PianoKeyboard({ onPlay, showLabels, targetId, notes = LESSON_NOTES }: {
+  onPlay: (midi: number, onsetTimeMs: number) => void;
   showLabels: boolean;
   targetId: string;
+  notes?: LessonNote[];
 }) {
   return (
     <div className="piano-keys" aria-label="One-octave on-screen piano">
-      {LESSON_NOTES.map((note) => (
+      {notes.map((note) => (
         <button
           className="piano-key"
           key={note.id}
@@ -34,7 +35,7 @@ export function PianoKeyboard({ onPlay, showLabels, targetId }: {
           aria-label={`Play ${note.spokenName}`}
           onClick={() => {
             playTone(note.midi);
-            onPlay(note.midi);
+            onPlay(note.midi, performance.now());
           }}
         >
           <span className={showLabels && note.id === targetId ? "key-label target" : "key-label"}>

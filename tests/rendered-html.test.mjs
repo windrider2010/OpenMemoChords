@@ -30,13 +30,17 @@ test("exposes an uncached production health endpoint", async () => {
   assert.deepEqual(await response.json(), { status: "ok", service: "openmemo-chords" });
 });
 
-test("ships the focused two-mode adaptive practice experience", async () => {
-  const [page, layout, css, packageJson, trainer, staff, notes, worklet, manifest] = await Promise.all([
+test("ships the focused adaptive curriculum and progress experience", async () => {
+  const [page, layout, css, packageJson, trainer, dashboard, curriculum, progress, pitch, staff, notes, worklet, manifest] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(new URL("../app/components/PianoTrainer.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/ProgressDashboard.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/curriculum.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/progress.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/hooks/usePitchDetector.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/StaffNote.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/notes.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/audio/pitch-worklet.js", import.meta.url), "utf8"),
@@ -46,9 +50,12 @@ test("ships the focused two-mode adaptive practice experience", async () => {
   assert.match(page, /<PianoTrainer \/>/);
   assert.match(layout, /manifest:\s*"\/manifest\.webmanifest"/);
   assert.match(css, /\.notation-stage/);
-  assert.match(css, /min-height:\s*clamp\(350px, 56vh, 610px\)/);
+  assert.match(css, /min-height:\s*clamp\(330px, 49vh, 560px\)/);
   assert.match(css, /\.winter-celebration/);
+  assert.match(css, /\.snowflake-border/);
+  assert.match(css, /\.dashboard-shell/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(css, /\.snowfall\s*\{/);
   assert.match(trainer, /recordMistake/);
   assert.match(trainer, /ratingForAnswer/);
   assert.match(trainer, /Have a Piano/);
@@ -57,6 +64,21 @@ test("ships the focused two-mode adaptive practice experience", async () => {
   assert.match(trainer, /Play this note/);
   assert.match(trainer, /Start listening/);
   assert.match(trainer, /Crystal Crown earned!/);
+  assert.match(trainer, /Noise guard on/);
+  assert.match(trainer, /Start the beat/);
+  assert.match(trainer, /ProgressDashboard/);
+  assert.match(dashboard, /Accuracy journey/);
+  assert.match(dashboard, /Reset all stats/);
+  assert.match(dashboard, /Crystal palace/);
+  assert.match(curriculum, /Quarter and half notes/);
+  assert.match(curriculum, /Short stepwise melodies/);
+  assert.match(curriculum, /Treble and bass journeys/);
+  assert.match(progress, /this\.version\(2\)/);
+  assert.match(progress, /resetAllStats/);
+  assert.match(progress, /pointsForAnswer/);
+  assert.match(pitch, /noiseFloorRef/);
+  assert.match(pitch, /centsSpread/);
+  assert.match(pitch, /createBiquadFilter/);
   assert.match(staff, /note\.id === "C4"/);
   assert.match(staff, /setKeyLine\(0, 0\)/);
   assert.match(notes, /id: "C4", midi: 60, vexKey: "c\/4"/);
